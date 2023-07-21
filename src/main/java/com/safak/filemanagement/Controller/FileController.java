@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,9 +41,9 @@ public class FileController {
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/uploadFile")
-    public ResponseEntity<FileDto> hanleFileUpload(@RequestParam("file") MultipartFile file, @RequestHeader(name="Authorization") String token){
-        String user = jwtTokenProvider.getUsername(token);
+    public ResponseEntity<FileDto> hanleFileUpload(@RequestParam("file") MultipartFile file){
         FileDto newFileDto = fileServiceImpl.saveNewFile(file);;
 
         return new ResponseEntity<>(newFileDto, HttpStatus.OK);
@@ -55,8 +56,7 @@ public class FileController {
     })
 
     @GetMapping("/getAllFileInfo")
-    public ResponseEntity<List<FileDto>> getAllFileInfo(@RequestHeader (name="Authorization") String token){
-        String user = jwtTokenProvider.getUsername(token);
+    public ResponseEntity<List<FileDto>> getAllFileInfo(){
 
         List<FileDto> allFileInfo = fileServiceImpl.getAllFiles();
         return allFileInfo.size() > 0 ? new ResponseEntity<>(allFileInfo,HttpStatus.OK) : new ResponseEntity<>(allFileInfo,HttpStatus.NO_CONTENT);
@@ -70,8 +70,7 @@ public class FileController {
     })
 
     @GetMapping("/getFileInfo/{id}")
-    public ResponseEntity<FileDto> getFileInfo(@PathVariable String id, @RequestHeader (name="Authorization") String token){
-        String user = jwtTokenProvider.getUsername(token);
+    public ResponseEntity<FileDto> getFileInfo(@PathVariable String id){
 
         FileDto fileInfo = fileServiceImpl.getSingleFile(id);
         return new ResponseEntity<>(fileInfo,HttpStatus.OK);
@@ -83,10 +82,9 @@ public class FileController {
             @ApiResponse(responseCode = "204", description = "File Content Not Found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
-
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/delete/{filename}")
-    public ResponseEntity<String> delete(@PathVariable String filename, @RequestHeader (name="Authorization") String token) {
-        String user = jwtTokenProvider.getUsername(token);
+    public ResponseEntity<String> delete(@PathVariable String filename) {
 
         try {
             boolean existed = fileServiceImpl.deleteFile(filename);
@@ -102,8 +100,7 @@ public class FileController {
 
 
     @GetMapping(value = "/getfile/{filename}")
-    public @ResponseBody ResponseEntity<byte[]> getImageWithMediaType(@PathVariable String filename, @RequestHeader (name="Authorization") String token) throws IOException {
-        String user = jwtTokenProvider.getUsername(token);
+    public @ResponseBody ResponseEntity<byte[]> getImageWithMediaType(@PathVariable String filename) throws IOException {
 
         HttpHeaders headers = new HttpHeaders();
         MediaType mediaType = FileExtentions.getContentType(filename);

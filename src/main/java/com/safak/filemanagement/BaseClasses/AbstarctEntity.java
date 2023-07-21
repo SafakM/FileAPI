@@ -22,7 +22,7 @@ public abstract class AbstarctEntity {
     @Column(name = "updated_date")
     @UpdateTimestamp
     private Date updatedDate;
-    @Column(name = "file_statu",columnDefinition = "boolean default true")
+    @Column(name = "statu",columnDefinition = "boolean default true")
     private boolean isActive;
 
 
